@@ -1,9 +1,12 @@
-import { interval, mergeMap, Observable, of, timer } from 'rxjs'
+import { finalize, interval, map, mergeMap, Observable, of, takeWhile, timer } from 'rxjs'
 
 export class DrawerService {
   private readonly icon_size = 32
   private readonly select_icon_size = 30
   private readonly tail_size = 60
+
+  constructor() {
+  }
 
   draw(
     ctx: CanvasRenderingContext2D,
@@ -35,24 +38,9 @@ export class DrawerService {
     iconIndex: number,
     x: number,
     y: number,
-    loop?: boolean,
   ): Observable<number> {
     if (!ctx) {
       return of(0)
-    }
-
-    if (!loop) {
-      return timer(0, 50).pipe(
-        mergeMap((value) => {
-          if (value < 4) {
-            iconX = (value + 1) * this.icon_size
-            this.draw(ctx, sourceImg, iconIndex, x, y)
-            return [value++]
-          } else {
-            return []
-          }
-        }),
-      )
     }
 
     let iconX = 0
@@ -74,6 +62,62 @@ export class DrawerService {
         )
         return [value++]
       }),
+    )
+  }
+
+  moveItem(ctx: CanvasRenderingContext2D,
+    sourceImg: HTMLImageElement,
+    iconIndex: number,
+    sourceX: number,
+    sourceY: number,
+    targetX: number,
+    targetY: number
+  ) {
+    let iconX = 0;
+
+    const stepX = (targetX - sourceX) * this.tail_size / 4;
+    const stepY = (targetY - sourceY) * this.tail_size / 4;
+
+    let x = sourceX * this.tail_size;
+    let y = sourceY * this.tail_size;
+
+    return timer(0, 30).pipe(
+      takeWhile((value) => value < 4),
+      map((value) => {
+        if (value < 4) {
+          iconX = ((value + 1) % 4) * this.icon_size
+          this.clearRect(ctx, x, y);
+          x += stepX;
+          y += stepY;
+          this.updateRect(ctx, sourceImg, iconX, iconIndex, x, y)
+          return value++
+        }
+      }),
+      finalize(() => {})
+    )
+  }
+
+  private clearRect(ctx: CanvasRenderingContext2D, x: number, y: number) {
+    ctx.clearRect(x, y, this.tail_size, this.tail_size);
+  }
+
+  private updateRect(
+    ctx: CanvasRenderingContext2D,
+    sourceImg: HTMLImageElement,
+    iconX: number,
+    iconIndex: number,
+    x: number,
+    y: number) {
+    ctx.drawImage(
+      sourceImg,
+      iconX,
+      iconIndex * this.icon_size,
+      this.icon_size,
+      this.icon_size,
+      x,
+      y,
+      this.tail_size,
+      this.tail_size,
     )
   }
 }

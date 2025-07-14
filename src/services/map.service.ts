@@ -1,40 +1,40 @@
 import { DEFAULT_MAP } from '@/data/map'
 import { wall_data, wall_tail_gallery } from '@/data/walls'
-import animates from '@/materials/animates.png'
-import terrainsImage from '@/materials/terrains.png'
 import { type Wall } from '@/models/wall.model'
-import { concat, fromEvent } from 'rxjs'
-import { ref } from 'vue'
+import type { DataService } from './data.service'
 import { DrawerService } from './drawer.service'
+import type { ImageService } from './image.service'
 
 export class MapService {
   private drawerService: DrawerService
+  private dataService: DataService
+  private imgService: ImageService
 
   private ctx: CanvasRenderingContext2D | null = null
 
-  private animatesImageElement = ref(new Image())
-  private animatesImgLoad$ = fromEvent(this.animatesImageElement.value, 'load')
-
-  private terrainsImageElement = ref(new Image())
-  private terrainsImgLoad$ = fromEvent(this.terrainsImageElement.value, 'load')
-
-  private floorId = 0
-
-  constructor(drawerService: DrawerService) {
-    this.drawerService = drawerService
-    this.animatesImageElement.value.src = animates
-    this.terrainsImageElement.value.src = terrainsImage
+  get floorId(): number {
+    return this.dataService.player.floor
   }
 
-  drawMapFloor(canvas: HTMLCanvasElement, flooId: number) {
+  constructor(
+    drawerService: DrawerService,
+    dataService: DataService,
+    imgService: ImageService
+  )
+    {
+    this.drawerService = drawerService
+    this.dataService = dataService
+    this.imgService = imgService
+  }
+
+  drawMapFloor(canvas: HTMLCanvasElement) {
     this.ctx = canvas.getContext('2d')
-    this.floorId = flooId
 
     if (!this.ctx) {
       return
     }
 
-    concat(this.animatesImgLoad$, this.terrainsImgLoad$).subscribe(() => {
+    this.imgService.imgsLoad$.subscribe(() => {
       this.drawMap()
     })
   }
@@ -62,7 +62,7 @@ export class MapService {
       return
     }
 
-    this.drawerService.draw(this.ctx, this.terrainsImageElement.value, 0, x, y)
+    this.drawerService.draw(this.ctx, this.imgService.terrainsImg, 0, x, y)
   }
 
   private drawWall(wallData: Wall[], x: number, y: number) {
@@ -77,7 +77,6 @@ export class MapService {
 
     const tail = wall_tail_gallery[wall.wallId]
     this.drawerService
-      .drawAnimate(this.ctx, this.animatesImageElement.value, tail.iconIndex, x, y, true)
-      .subscribe()
+      .drawAnimate(this.ctx, this.imgService.animatesImg, tail.iconIndex, x, y).subscribe()
   }
 }
