@@ -1,10 +1,10 @@
-import { concat, fromEvent, take } from 'rxjs'
-import { ref } from 'vue'
+import { DEFAULT_MAP } from '@/data/map'
+import { wall_data, wall_tail_gallery } from '@/data/walls'
 import animates from '@/materials/animates.png'
 import terrainsImage from '@/materials/terrains.png'
-import { DEFAULT_MAP } from '@/data/map'
 import { type Wall } from '@/models/wall.model'
-import { wall_data, wall_tail_gallery } from '@/data/walls'
+import { concat, fromEvent } from 'rxjs'
+import { ref } from 'vue'
 import { DrawerService } from './drawer.service'
 
 export class MapService {
@@ -26,7 +26,7 @@ export class MapService {
     this.terrainsImageElement.value.src = terrainsImage
   }
 
-  drowMapFloor(canvas: HTMLCanvasElement, flooId: number) {
+  drawMapFloor(canvas: HTMLCanvasElement, flooId: number) {
     this.ctx = canvas.getContext('2d')
     this.floorId = flooId
 

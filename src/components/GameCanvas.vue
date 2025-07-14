@@ -31,25 +31,50 @@
 import { defineComponent, inject, onMounted, onBeforeUnmount, ref, type Ref } from 'vue';
 import type { MapService } from '@/services/map.service';
 import type { DoorService } from '@/services/door.service';
+import type { PlayerService } from '@/services/palyer.service';
+import { filter, fromEvent, Subject, takeUntil } from 'rxjs';
 
 export default defineComponent({
   setup() {
     const mapService = inject('mapService') as MapService;
     const doorService = inject('doorService') as DoorService;
+    const playerService = inject('playerService') as PlayerService;
 
     const gameCanvas: Ref<HTMLCanvasElement | undefined> = ref();
 
     const floor = 0;
 
-    const drawMap = () => {
-      if (gameCanvas.value) {
-        mapService.drowMapFloor(gameCanvas.value, floor);
-        doorService.drowDoors(gameCanvas.value, floor)
-      };
+    const destroy$ = new Subject()
+
+    const loadGameState = () => {
+
+    }
+
+    const drawGame = () => {
+      if (!gameCanvas.value) {
+        return
+      }
+      mapService.drawMapFloor(gameCanvas.value, floor);
+      doorService.drawDoors(gameCanvas.value, floor)
+      playerService.initialize(gameCanvas.value)
     };
 
+    const handleKeyDown = () => fromEvent(document, 'keydown')
+      .pipe(
+        filter((event) => [
+          'ArrowUp',
+          'ArrowDown',
+          'ArrowLeft',
+          'ArrowRight'].includes((event as KeyboardEvent).key)),
+        takeUntil(destroy$))
+      .subscribe((event) => {
+        playerService.move((event as KeyboardEvent).key)
+      });
+
     onMounted(() => {
-      drawMap();
+      loadGameState();
+      drawGame();
+      handleKeyDown();
     });
 
     onBeforeUnmount(() => {

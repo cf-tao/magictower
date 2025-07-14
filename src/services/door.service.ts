@@ -18,7 +18,7 @@ export class DoorService {
     this.doorImage.value.src = animates
   }
 
-  drowDoors(canvas: HTMLCanvasElement, floorId: number) {
+  drawDoors(canvas: HTMLCanvasElement, floorId: number) {
     this.ctx = canvas.getContext('2d')
 
     if (!this.ctx) {
