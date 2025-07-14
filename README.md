@@ -1,10 +1,6 @@
-<<<<<<< HEAD
 # Magic Tower
-Use canvas and vue3 to achieve the classic game 21 Floors Magic Tower.
-=======
-# mota
 
-This template should help get you started developing with Vue 3 in Vite.
+Use canvas and vue3 to achieve the classic game 21 Floors Magic Tower.
 
 ## Recommended IDE Setup
 
@@ -41,4 +37,3 @@ npm run build
 ```sh
 npm run lint
 ```
->>>>>>> e8b6019 (init(app): init git repo for project)
